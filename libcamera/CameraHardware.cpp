@@ -25,7 +25,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#define VIDEO_DEVICE        "/dev/video0"
 #define MIN_WIDTH           640
 #define MIN_HEIGHT          480
 #define CAM_SIZE            "640x480"
@@ -147,15 +146,25 @@ status_t CameraHardware::startPreview()
 {
     int ret;
     int width, height;
-
+    int i;
+    char devnode[12];
     Mutex::Autolock lock(mLock);
     if (mPreviewThread != 0) {
         //already running
         return INVALID_OPERATION;
     }
+    LOGI("startPreview: in startpreview \n");
 
-        LOGI("startPreview: in startpreview \n");
-    camera.Open(VIDEO_DEVICE, MIN_WIDTH, MIN_HEIGHT, PIXEL_FORMAT);
+    for( i=0; i<10; i++) {
+        sprintf(devnode,"/dev/video%d",i);
+        LOGI("trying the node %s \n",devnode);
+        ret = camera.Open(devnode, MIN_WIDTH, MIN_HEIGHT, PIXEL_FORMAT);
+        if( ret >= 0)
+            break;
+        }
+
+    if( ret < 0)
+        return -1;
 
     mPreviewFrameSize = MIN_WIDTH * MIN_HEIGHT * 2;
 
@@ -286,6 +295,8 @@ int CameraHardware::pictureThread()
     struct v4l2_buffer cfilledbuffer;
     struct v4l2_requestbuffers creqbuf;
     struct v4l2_capability cap;
+    int i;
+    char devnode[12];
 
 
    if (mMsgEnabled & CAMERA_MSG_SHUTTER)
@@ -296,7 +307,18 @@ int CameraHardware::pictureThread()
 
     int width, height;
     mParameters.getPictureSize(&width, &height);
-    camera.Open(VIDEO_DEVICE, MIN_WIDTH, MIN_HEIGHT, PIXEL_FORMAT);
+
+    for(i=0; i<10; i++) {
+        sprintf(devnode,"/dev/video%d",i);
+        LOGI("trying the node %s \n",devnode);
+        ret = camera.Open(devnode, MIN_WIDTH, MIN_HEIGHT, PIXEL_FORMAT);
+        if( ret >= 0)
+            break;
+    }
+
+    if( ret < 0)
+        return -1;
+
     camera.Init();
     camera.StartStreaming();
 
