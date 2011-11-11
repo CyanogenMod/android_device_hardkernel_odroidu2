@@ -48,7 +48,6 @@ public:
     int StopStreaming ();
 
     void GrabPreviewFrame (void *previewBuffer);
-    void GrabRecordFrame (void *recordBuffer);
     sp<IMemory> GrabRawFrame ();
     sp<IMemory> GrabJpegFrame ();
 

@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES :=       \
     CameraHardware.cpp   \
     V4L2Camera.cpp       \
-    converter.cpp
+    convert.S
 
 LOCAL_C_INCLUDES += external/jpeg
 

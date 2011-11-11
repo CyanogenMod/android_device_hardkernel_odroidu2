@@ -25,14 +25,19 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#define MIN_WIDTH           640
-#define MIN_HEIGHT          480
-#define CAM_SIZE            "640x480"
+#define MIN_WIDTH           320
+#define MIN_HEIGHT          240
+#define CAM_SIZE            "320x240"
 #define PIXEL_FORMAT        V4L2_PIX_FMT_YUYV
+extern "C" {
+    void yuyv422_to_yuv420sp(unsigned char*,unsigned char*,int,int);
+}
 
 namespace android {
 
 wp<CameraHardwareInterface> CameraHardware::singleton;
+
+const char supportedFpsRanges [] = "(8000,8000),(8000,10000),(10000,10000),(8000,15000),(15000,15000),(8000,20000),(20000,20000),(24000,24000),(25000,25000),(8000,30000),(30000,30000)";
 
 CameraHardware::CameraHardware(int cameraId)
                   : mCameraId(cameraId),
@@ -61,10 +66,11 @@ void CameraHardware::initDefaultParameters()
     CameraParameters p;
 
     p.setPreviewSize(MIN_WIDTH, MIN_HEIGHT);
-    p.setPreviewFrameRate(15);
+    p.setPreviewFrameRate(30);
     p.setPreviewFormat("yuv422sp");
     p.set(p.KEY_SUPPORTED_PREVIEW_SIZES, CAM_SIZE);
-
+    p.set(p.KEY_SUPPORTED_PREVIEW_SIZES, "640x480");
+    p.set(CameraParameters::KEY_VIDEO_FRAME_FORMAT,CameraParameters::PIXEL_FORMAT_YUV420SP);
     p.setPictureSize(MIN_WIDTH, MIN_HEIGHT);
     p.setPictureFormat("jpeg");
     p.set(p.KEY_SUPPORTED_PICTURE_SIZES, CAM_SIZE);
@@ -125,15 +131,17 @@ bool CameraHardware::msgTypeEnabled(int32_t msgType)
 //-------------------------------------------------------------
 int CameraHardware::previewThread()
 {
+    int width, height;
+    mParameters.getPreviewSize(&width, &height);
     if (!previewStopped) {
         // Get preview frame
         camera.GrabPreviewFrame(mHeap->getBase());
         if ((mMsgEnabled & CAMERA_MSG_PREVIEW_FRAME) ||
-		(mMsgEnabled & CAMERA_MSG_VIDEO_FRAME)) {
-            if (mMsgEnabled & CAMERA_MSG_VIDEO_FRAME) {
-			camera.GrabRecordFrame(mRecordHeap->getBase());
-			nsecs_t timeStamp = systemTime(SYSTEM_TIME_MONOTONIC);
-			mTimestampFn(timeStamp, CAMERA_MSG_VIDEO_FRAME,mRecordBuffer, mUser);
+                (mMsgEnabled & CAMERA_MSG_VIDEO_FRAME)) {
+            if ((mMsgEnabled & CAMERA_MSG_VIDEO_FRAME ) && mRecordRunning ) {
+                yuyv422_to_yuv420sp((unsigned char *)mHeap->getBase(), (unsigned char*)mRecordHeap->getBase(), width, height);
+                nsecs_t timeStamp = systemTime(SYSTEM_TIME_MONOTONIC);
+                mTimestampFn(timeStamp, CAMERA_MSG_VIDEO_FRAME,mRecordBuffer, mUser);
             }
             mDataFn(CAMERA_MSG_PREVIEW_FRAME,mBuffer, mUser);
 	}
@@ -154,11 +162,11 @@ status_t CameraHardware::startPreview()
         return INVALID_OPERATION;
     }
     LOGI("startPreview: in startpreview \n");
-
+    mParameters.getPreviewSize(&width, &height);
     for( i=0; i<10; i++) {
         sprintf(devnode,"/dev/video%d",i);
-        LOGI("trying the node %s \n",devnode);
-        ret = camera.Open(devnode, MIN_WIDTH, MIN_HEIGHT, PIXEL_FORMAT);
+        LOGI("trying the node %s width=%d height=%d \n",devnode,width,height);
+        ret = camera.Open(devnode, width, height, PIXEL_FORMAT);
         if( ret >= 0)
             break;
         }
@@ -166,7 +174,7 @@ status_t CameraHardware::startPreview()
     if( ret < 0)
         return -1;
 
-    mPreviewFrameSize = MIN_WIDTH * MIN_HEIGHT * 2;
+    mPreviewFrameSize = width * height * 2;
 
     mHeap = new MemoryHeapBase(mPreviewFrameSize);
     mBuffer = new MemoryBase(mHeap, 0, mPreviewFrameSize);
@@ -201,12 +209,6 @@ void CameraHardware::stopPreview()
         previewStopped = true;
     }
 
-    if (mPreviewThread != 0) {
-        camera.Uninit();
-        camera.StopStreaming();
-        camera.Close();
-    }
-
     {
         Mutex::Autolock lock(mLock);
         previewThread = mPreviewThread;
@@ -214,6 +216,12 @@ void CameraHardware::stopPreview()
 
     if (previewThread != 0) {
         previewThread->requestExitAndWait();
+    }
+
+    if (mPreviewThread != 0) {
+        camera.Uninit();
+        camera.StopStreaming();
+        camera.Close();
     }
 
     Mutex::Autolock lock(mLock);
@@ -229,8 +237,8 @@ status_t CameraHardware::startRecording()
 {
     Mutex::Autolock lock(mLock);
 
-    mRecordHeap = new MemoryHeapBase(mPreviewFrameSize);
-    mRecordBuffer = new MemoryBase(mRecordHeap, 0, mPreviewFrameSize);
+    mRecordHeap = new MemoryHeapBase(mPreviewFrameSize*3/4);
+    mRecordBuffer = new MemoryBase(mRecordHeap, 0, mPreviewFrameSize*3/4);
     mRecordRunning = true;
 
     return NO_ERROR;
@@ -307,11 +315,12 @@ int CameraHardware::pictureThread()
 
     int width, height;
     mParameters.getPictureSize(&width, &height);
+    mParameters.getPreviewSize(&width, &height);
 
     for(i=0; i<10; i++) {
         sprintf(devnode,"/dev/video%d",i);
         LOGI("trying the node %s \n",devnode);
-        ret = camera.Open(devnode, MIN_WIDTH, MIN_HEIGHT, PIXEL_FORMAT);
+        ret = camera.Open(devnode, width, height, PIXEL_FORMAT);
         if( ret >= 0)
             break;
     }
@@ -374,16 +383,16 @@ status_t CameraHardware::setParameters(const CameraParameters& params)
     int w, h;
     int framerate;
 
+    mParameters = params;
+    params.getPictureSize(&w, &h);
+    mParameters.setPictureSize(w,h);
     params.getPreviewSize(&w, &h);
+    mParameters.setPreviewSize(w,h);
     framerate = params.getPreviewFrameRate();
     LOGD("PREVIEW SIZE: w=%d h=%d framerate=%d", w, h, framerate);
-
-    params.getPictureSize(&w, &h);
-
     mParameters = params;
-
-    // Set to fixed sizes
-    mParameters.setPreviewSize(MIN_WIDTH,MIN_HEIGHT);
+    mParameters.setPreviewSize(w,h);
+    mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE, supportedFpsRanges);
 
     return NO_ERROR;
 }
