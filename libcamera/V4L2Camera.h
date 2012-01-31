@@ -17,6 +17,7 @@
 #include <binder/MemoryHeapBase.h>
 #include <linux/videodev.h>
 
+#include <hardware/camera.h>
 namespace android {
 
 struct vdIn {
@@ -47,9 +48,10 @@ public:
     int StartStreaming ();
     int StopStreaming ();
 
-    void GrabPreviewFrame (void *previewBuffer);
+    void * GrabPreviewFrame ();
+    void ReleasePreviewFrame ();
     sp<IMemory> GrabRawFrame ();
-    sp<IMemory> GrabJpegFrame ();
+    camera_memory_t*   GrabJpegFrame (camera_request_memory   mRequestMemory);
 
 private:
     struct vdIn *videoIn;

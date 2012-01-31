@@ -24,18 +24,26 @@
 #include "CameraHardware.h"
 #include <fcntl.h>
 #include <sys/mman.h>
-
+#include <cutils/native_handle.h>
+#include <hal_public.h>
+#include <ui/GraphicBufferMapper.h>
+#include <gui/ISurfaceTexture.h>
 #define MIN_WIDTH           320
 #define MIN_HEIGHT          240
 #define CAM_SIZE            "320x240"
 #define PIXEL_FORMAT        V4L2_PIX_FMT_YUYV
+#define CAMHAL_GRALLOC_USAGE GRALLOC_USAGE_HW_TEXTURE | \
+                             GRALLOC_USAGE_HW_RENDER | \
+                             GRALLOC_USAGE_SW_READ_RARELY | \
+                             GRALLOC_USAGE_SW_WRITE_NEVER
+
 extern "C" {
     void yuyv422_to_yuv420sp(unsigned char*,unsigned char*,int,int);
+    void convertYUYVtoRGB565(unsigned char *buf, unsigned char *rgb, int width, int height);
 }
 
 namespace android {
 
-wp<CameraHardwareInterface> CameraHardware::singleton;
 
 const char supportedFpsRanges [] = "(8000,8000),(8000,10000),(10000,10000),(8000,15000),(15000,15000),(8000,20000),(20000,20000),(24000,24000),(25000,25000),(8000,30000),(30000,30000)";
 
@@ -59,6 +67,7 @@ CameraHardware::CameraHardware(int cameraId)
                     mMsgEnabled(0)
 {
     initDefaultParameters();
+    mNativeWindow=NULL;
 }
 
 void CameraHardware::initDefaultParameters()
@@ -71,6 +80,7 @@ void CameraHardware::initDefaultParameters()
     p.set(p.KEY_SUPPORTED_PREVIEW_SIZES, CAM_SIZE);
     p.set(p.KEY_SUPPORTED_PREVIEW_SIZES, "640x480");
     p.set(CameraParameters::KEY_VIDEO_FRAME_FORMAT,CameraParameters::PIXEL_FORMAT_YUV420SP);
+    p.set(CameraParameters::KEY_FOCUS_MODE,0);
     p.setPictureSize(MIN_WIDTH, MIN_HEIGHT);
     p.setPictureFormat("jpeg");
     p.set(p.KEY_SUPPORTED_PICTURE_SIZES, CAM_SIZE);
@@ -82,7 +92,6 @@ void CameraHardware::initDefaultParameters()
 
 CameraHardware::~CameraHardware()
 {
-    singleton.clear();
 }
 
 sp<IMemoryHeap> CameraHardware::getPreviewHeap() const
@@ -97,16 +106,51 @@ sp<IMemoryHeap> CameraHardware::getRawHeap() const
 
 // ---------------------------------------------------------------------------
 
-void CameraHardware::setCallbacks(notify_callback notify_cb,
-                                  data_callback data_cb,
-                                  data_callback_timestamp data_cb_timestamp,
+void CameraHardware::setCallbacks(camera_notify_callback notify_cb,
+                                  camera_data_callback data_cb,
+                                  camera_data_timestamp_callback data_cb_timestamp,
+                                  camera_request_memory get_memory,
                                   void *arg)
 {
     Mutex::Autolock lock(mLock);
     mNotifyFn = notify_cb;
     mDataFn = data_cb;
+    mRequestMemory = get_memory;
     mTimestampFn = data_cb_timestamp;
     mUser = arg;
+}
+
+int CameraHardware::setPreviewWindow( preview_stream_ops_t *window)
+{
+    int err;
+    Mutex::Autolock lock(mLock);
+        if(mNativeWindow)
+            mNativeWindow=NULL;
+    if(window==NULL)
+    {
+        LOGW("Window is Null");
+        return 0;
+    }
+    int width, height;
+    mParameters.getPreviewSize(&width, &height);
+    mNativeWindow=window;
+    mNativeWindow->set_usage(mNativeWindow,CAMHAL_GRALLOC_USAGE);
+    mNativeWindow->set_buffers_geometry(
+                mNativeWindow,
+                width,
+                height,
+                HAL_PIXEL_FORMAT_RGB_565);
+    err = mNativeWindow->set_buffer_count(mNativeWindow, 3);
+    if (err != 0) {
+        LOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err), -err);
+
+        if ( ENODEV == err ) {
+            LOGE("Preview surface abandoned!");
+            mNativeWindow = NULL;
+        }
+    }
+
+    return 0;
 }
 
 void CameraHardware::enableMsgType(int32_t msgType)
@@ -132,19 +176,48 @@ bool CameraHardware::msgTypeEnabled(int32_t msgType)
 int CameraHardware::previewThread()
 {
     int width, height;
+    int err;
+    IMG_native_handle_t** hndl2hndl;
+    IMG_native_handle_t* handle;
+    int stride;
     mParameters.getPreviewSize(&width, &height);
-    if (!previewStopped) {
+    int framesize= width * height * 1.5 ; //yuv420sp
+
+   if (!previewStopped) {
+    mLock.lock();
+    if (mNativeWindow != NULL)
+    {
+    if ((err = mNativeWindow->dequeue_buffer(mNativeWindow,(buffer_handle_t**) &hndl2hndl,&stride)) != 0) {
+        LOGW("Surface::dequeueBuffer returned error %d", err);
+        return -1;
+    }
+    mNativeWindow->lock_buffer(mNativeWindow, (buffer_handle_t*) hndl2hndl);
+    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
+
+    Rect bounds(width, height);
+    void *tempbuf;
+    void *dst;
+    if(0 == mapper.lock((buffer_handle_t)*hndl2hndl,CAMHAL_GRALLOC_USAGE, bounds, &dst)); 
+    {
         // Get preview frame
-        camera.GrabPreviewFrame(mHeap->getBase());
+        tempbuf=camera.GrabPreviewFrame();
+        convertYUYVtoRGB565((unsigned char *)tempbuf,(unsigned char *)dst, width, height);
+        mapper.unlock((buffer_handle_t)*hndl2hndl);
+        mNativeWindow->enqueue_buffer(mNativeWindow,(buffer_handle_t*) hndl2hndl);
         if ((mMsgEnabled & CAMERA_MSG_PREVIEW_FRAME) ||
                 (mMsgEnabled & CAMERA_MSG_VIDEO_FRAME)) {
+            camera_memory_t* picture = mRequestMemory(-1, framesize, 1, NULL);
+            yuyv422_to_yuv420sp((unsigned char *)tempbuf,(unsigned char *) picture->data, width, height);
             if ((mMsgEnabled & CAMERA_MSG_VIDEO_FRAME ) && mRecordRunning ) {
-                yuyv422_to_yuv420sp((unsigned char *)mHeap->getBase(), (unsigned char*)mRecordHeap->getBase(), width, height);
                 nsecs_t timeStamp = systemTime(SYSTEM_TIME_MONOTONIC);
-                mTimestampFn(timeStamp, CAMERA_MSG_VIDEO_FRAME,mRecordBuffer, mUser);
+                //mTimestampFn(timeStamp, CAMERA_MSG_VIDEO_FRAME,mRecordBuffer, mUser);
             }
-            mDataFn(CAMERA_MSG_PREVIEW_FRAME,mBuffer, mUser);
+            mDataFn(CAMERA_MSG_PREVIEW_FRAME,picture,0,NULL,mUser);
 	}
+        camera.ReleasePreviewFrame();
+    }
+    }
+    mLock.unlock();
     }
 
     return NO_ERROR;
@@ -155,12 +228,16 @@ status_t CameraHardware::startPreview()
     int ret;
     int width, height;
     int i;
+    IMG_native_handle_t** hndl2hndl;
+    IMG_native_handle_t* handle;
+    int stride;
     char devnode[12];
     Mutex::Autolock lock(mLock);
     if (mPreviewThread != 0) {
         //already running
         return INVALID_OPERATION;
     }
+#if 1
     LOGI("startPreview: in startpreview \n");
     mParameters.getPreviewSize(&width, &height);
     for( i=0; i<10; i++) {
@@ -197,6 +274,7 @@ status_t CameraHardware::startPreview()
     previewStopped = false;
     mPreviewThread = new PreviewThread(this);
 
+#endif
     return NO_ERROR;
 }
 
@@ -230,7 +308,8 @@ void CameraHardware::stopPreview()
 
 bool CameraHardware::previewEnabled()
 {
-    return mPreviewThread != 0;
+    Mutex::Autolock lock(mLock);
+    return ((mPreviewThread != 0) );
 }
 
 status_t CameraHardware::startRecording()
@@ -254,8 +333,9 @@ bool CameraHardware::recordingEnabled()
     return mRecordRunning;
 }
 
-void CameraHardware::releaseRecordingFrame(const sp<IMemory>& mem)
+void CameraHardware::releaseRecordingFrame(const void *opaque)
 {
+
 }
 
 // ---------------------------------------------------------------------------
@@ -305,6 +385,7 @@ int CameraHardware::pictureThread()
     struct v4l2_capability cap;
     int i;
     char devnode[12];
+    camera_memory_t* picture = NULL;
 
 
    if (mMsgEnabled & CAMERA_MSG_SHUTTER)
@@ -330,10 +411,11 @@ int CameraHardware::pictureThread()
 
     camera.Init();
     camera.StartStreaming();
-
+    //TODO xxx : Optimize the memory capture call. Too many memcpy
     if (mMsgEnabled & CAMERA_MSG_COMPRESSED_IMAGE) {
         LOGD ("mJpegPictureCallback");
-        mDataFn(CAMERA_MSG_COMPRESSED_IMAGE, camera.GrabJpegFrame(),mUser);
+        picture = camera.GrabJpegFrame(mRequestMemory);
+        mDataFn(CAMERA_MSG_COMPRESSED_IMAGE,picture,0,NULL ,mUser);
     }
 
     camera.Uninit();
@@ -347,8 +429,6 @@ status_t CameraHardware::takePicture()
 {
         LOGD ("takepicture");
     stopPreview();
-    //if (createThread(beginPictureThread, this) == false)
-    //    return -1;
 
     pictureThread();
 
@@ -370,11 +450,6 @@ status_t CameraHardware::setParameters(const CameraParameters& params)
 {
     Mutex::Autolock lock(mLock);
 
-    if (strcmp(params.getPreviewFormat(), "yuv422sp") != 0) {
-        LOGE("Only yuv422sp preview is supported");
-        return -1;
-    }
-
     if (strcmp(params.getPictureFormat(), "jpeg") != 0) {
         LOGE("Only jpeg still pictures are supported");
         return -1;
@@ -393,6 +468,7 @@ status_t CameraHardware::setParameters(const CameraParameters& params)
     mParameters = params;
     mParameters.setPreviewSize(w,h);
     mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE, supportedFpsRanges);
+    mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "320x240,352x288,640x480,720x480,720x576,848x480");
 
     return NO_ERROR;
 }
@@ -415,49 +491,6 @@ CameraParameters CameraHardware::getParameters() const
 void CameraHardware::release()
 {
     close(camera_device);
-}
-
-sp<CameraHardwareInterface> CameraHardware::createInstance(int cameraId)
-{
-    if (singleton != 0) {
-        sp<CameraHardwareInterface> hardware = singleton.promote();
-        if (hardware != 0) {
-            return hardware;
-        }
-    }
-    sp<CameraHardwareInterface> hardware(new CameraHardware(cameraId));
-    singleton = hardware;
-    return hardware;
-}
-
-static CameraInfo sCameraInfo[] = {
-	{
-		facing: CAMERA_FACING_BACK,
-		orientation: 0
-	},
-/*
-	{
-		facing: CAMERA_FACING_FRONT,
-		orientation: 0
-	}
-*/
-};
-
-extern "C" int HAL_getNumberOfCameras()
-{
-	return sizeof(sCameraInfo) / sizeof(sCameraInfo[0]);
-}
-
-extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo* cameraInfo)
-{
-LOGD("HAL_getCameraInfo: %d", cameraId);
-	memcpy(cameraInfo, &sCameraInfo[cameraId], sizeof(CameraInfo));
-}
-
-extern "C" sp<CameraHardwareInterface> HAL_openCameraHardware(int cameraId)
-{
-LOGD("HAL_openCameraHardware: %d", cameraId);
-	return CameraHardware::createInstance(cameraId);
 }
 
 }; // namespace android

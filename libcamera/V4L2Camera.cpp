@@ -17,6 +17,7 @@
 
 extern "C" { /* Android jpeglib.h missed extern "C" */
 #include <jpeglib.h>
+     void convertYUYVtoRGB565(unsigned char *buf, unsigned char *rgb, int width, int height);
 }
 
 namespace android {
@@ -198,7 +199,7 @@ int V4L2Camera::StopStreaming ()
     return 0;
 }
 
-void V4L2Camera::GrabPreviewFrame (void *previewBuffer)
+void * V4L2Camera::GrabPreviewFrame ()
 {
     unsigned char *tmpBuffer;
     int ret;
@@ -209,21 +210,22 @@ void V4L2Camera::GrabPreviewFrame (void *previewBuffer)
     /* DQ */
     ret = ioctl(fd, VIDIOC_DQBUF, &videoIn->buf);
     if (ret < 0) {
-        //LOGE("GrabPreviewFrame: VIDIOC_DQBUF Failed");
-
-        return;
+        LOGE("GrabPreviewFrame: VIDIOC_DQBUF Failed");
+        return NULL;
     }
     nDequeued++;
+    return  videoIn->mem[videoIn->buf.index];
+}
 
-    memcpy (previewBuffer, videoIn->mem[videoIn->buf.index], (size_t) videoIn->buf.bytesused);
+void V4L2Camera::ReleasePreviewFrame ()
+{
+    int ret;
     ret = ioctl(fd, VIDIOC_QBUF, &videoIn->buf);
+    nQueued++;
     if (ret < 0) {
         LOGE("GrabPreviewFrame: VIDIOC_QBUF Failed");
         return;
     }
-
-    nQueued++;
-
 }
 
 
@@ -296,7 +298,7 @@ int MemoryStream::readPipe()
     return 0;
 }
 
-sp<IMemory> V4L2Camera::GrabJpegFrame ()
+camera_memory_t*  V4L2Camera::GrabJpegFrame (camera_request_memory   mRequestMemory)
 {
     int ret;
 
@@ -327,13 +329,11 @@ sp<IMemory> V4L2Camera::GrabJpegFrame ()
         saveYUYVtoJPEG((unsigned char *)videoIn->mem[videoIn->buf.index], videoIn->width, videoIn->height, strm, 100);
         strm.closeStream();
         size_t fileSize = strm.getOffset();
-
-        sp<MemoryHeapBase> mjpegPictureHeap = new MemoryHeapBase(fileSize);
-        sp<MemoryBase> jpegmemBase = new MemoryBase(mjpegPictureHeap, 0, fileSize);
-        memcpy(mjpegPictureHeap->base(), tmpBuf, fileSize);
+         camera_memory_t* picture = mRequestMemory(-1,fileSize,1,NULL);
+        memcpy(picture->data, tmpBuf, fileSize);
         delete[] tmpBuf;
 
-        return jpegmemBase;
+        return picture;
     }
 
     return NULL;
