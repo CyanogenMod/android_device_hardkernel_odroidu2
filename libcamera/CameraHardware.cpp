@@ -213,6 +213,7 @@ int CameraHardware::previewThread()
                 //mTimestampFn(timeStamp, CAMERA_MSG_VIDEO_FRAME,mRecordBuffer, mUser);
             }
             mDataFn(CAMERA_MSG_PREVIEW_FRAME,picture,0,NULL,mUser);
+	    picture->release(picture);
 	}
         camera.ReleasePreviewFrame();
     }
