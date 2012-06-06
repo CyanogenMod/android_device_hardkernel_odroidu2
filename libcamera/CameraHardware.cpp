@@ -232,7 +232,7 @@ status_t CameraHardware::startPreview()
     IMG_native_handle_t** hndl2hndl;
     IMG_native_handle_t* handle;
     int stride;
-    char devnode[12];
+    char devnode[15];
     Mutex::Autolock lock(mLock);
     if (mPreviewThread != 0) {
         //already running
@@ -385,7 +385,7 @@ int CameraHardware::pictureThread()
     struct v4l2_requestbuffers creqbuf;
     struct v4l2_capability cap;
     int i;
-    char devnode[12];
+    char devnode[15];
     camera_memory_t* picture = NULL;
 
 
