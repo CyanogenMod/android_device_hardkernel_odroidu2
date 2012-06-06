@@ -28,6 +28,7 @@
 #include <hal_public.h>
 #include <ui/GraphicBufferMapper.h>
 #include <gui/ISurfaceTexture.h>
+#define MAX_VIDEONODES      20
 #define MIN_WIDTH           320
 #define MIN_HEIGHT          240
 #define CAM_SIZE            "320x240"
@@ -241,7 +242,7 @@ status_t CameraHardware::startPreview()
 #if 1
     LOGI("startPreview: in startpreview \n");
     mParameters.getPreviewSize(&width, &height);
-    for( i=0; i<10; i++) {
+    for( i=MAX_VIDEONODES; i>=0; i--) {
         sprintf(devnode,"/dev/video%d",i);
         LOGI("trying the node %s width=%d height=%d \n",devnode,width,height);
         ret = camera.Open(devnode, width, height, PIXEL_FORMAT);
@@ -399,7 +400,7 @@ int CameraHardware::pictureThread()
     mParameters.getPictureSize(&width, &height);
     mParameters.getPreviewSize(&width, &height);
 
-    for(i=0; i<10; i++) {
+    for(i=MAX_VIDEONODES; i>=0; i--) {
         sprintf(devnode,"/dev/video%d",i);
         LOGI("trying the node %s \n",devnode);
         ret = camera.Open(devnode, width, height, PIXEL_FORMAT);
