@@ -1,3 +1,6 @@
+# omap4 has its own native camera implementation, see
+# hardware/ti/omap4xxx
+ifneq ($(TARGET_BOARD_PLATFORM),omap4)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
@@ -35,3 +38,4 @@ LOCAL_MODULE:= camera.$(TARGET_BOARD_PLATFORM)
 LOCAL_MODULE_TAGS:= optional
 
 include $(BUILD_SHARED_LIBRARY)
+endif
