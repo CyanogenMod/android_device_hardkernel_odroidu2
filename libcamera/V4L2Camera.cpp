@@ -38,23 +38,23 @@ int V4L2Camera::Open (const char *device, int width, int height, int pixelformat
     int ret;
 
     if ((fd = open(device, O_RDWR)) == -1) {
-        LOGE("ERROR opening V4L interface: %s", strerror(errno));
+        ALOGE("ERROR opening V4L interface: %s", strerror(errno));
     return -1;
     }
 
     ret = ioctl (fd, VIDIOC_QUERYCAP, &videoIn->cap);
     if (ret < 0) {
-        LOGE("Error opening device: unable to query device.");
+        ALOGE("Error opening device: unable to query device.");
         return -1;
     }
 
     if ((videoIn->cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) == 0) {
-        LOGE("Error opening device: video capture not supported.");
+        ALOGE("Error opening device: video capture not supported.");
         return -1;
     }
 
     if (!(videoIn->cap.capabilities & V4L2_CAP_STREAMING)) {
-        LOGE("Capture device does not support streaming i/o");
+        ALOGE("Capture device does not support streaming i/o");
         return -1;
     }
 
@@ -70,7 +70,7 @@ int V4L2Camera::Open (const char *device, int width, int height, int pixelformat
 
     ret = ioctl(fd, VIDIOC_S_FMT, &videoIn->format);
     if (ret < 0) {
-        LOGE("Open: VIDIOC_S_FMT Failed: %s", strerror(errno));
+        ALOGE("Open: VIDIOC_S_FMT Failed: %s", strerror(errno));
         return ret;
     }
 
@@ -93,7 +93,7 @@ int V4L2Camera::Init()
 
     ret = ioctl(fd, VIDIOC_REQBUFS, &videoIn->rb);
     if (ret < 0) {
-        LOGE("Init: VIDIOC_REQBUFS failed: %s", strerror(errno));
+        ALOGE("Init: VIDIOC_REQBUFS failed: %s", strerror(errno));
         return ret;
     }
 
@@ -107,7 +107,7 @@ int V4L2Camera::Init()
 
         ret = ioctl (fd, VIDIOC_QUERYBUF, &videoIn->buf);
         if (ret < 0) {
-            LOGE("Init: Unable to query buffer (%s)", strerror(errno));
+            ALOGE("Init: Unable to query buffer (%s)", strerror(errno));
             return ret;
         }
 
@@ -119,13 +119,13 @@ int V4L2Camera::Init()
                videoIn->buf.m.offset);
 
         if (videoIn->mem[i] == MAP_FAILED) {
-            LOGE("Init: Unable to map buffer (%s)", strerror(errno));
+            ALOGE("Init: Unable to map buffer (%s)", strerror(errno));
             return -1;
         }
 
         ret = ioctl(fd, VIDIOC_QBUF, &videoIn->buf);
         if (ret < 0) {
-            LOGE("Init: VIDIOC_QBUF Failed");
+            ALOGE("Init: VIDIOC_QBUF Failed");
             return -1;
         }
 
@@ -148,7 +148,7 @@ void V4L2Camera::Uninit ()
     for (int i = 0; i < DQcount-1; i++) {
         ret = ioctl(fd, VIDIOC_DQBUF, &videoIn->buf);
         if (ret < 0)
-            LOGE("Uninit: VIDIOC_DQBUF Failed");
+            ALOGE("Uninit: VIDIOC_DQBUF Failed");
     }
     nQueued = 0;
     nDequeued = 0;
@@ -156,7 +156,7 @@ void V4L2Camera::Uninit ()
     /* Unmap buffers */
     for (int i = 0; i < NB_BUFFER; i++)
         if (munmap(videoIn->mem[i], videoIn->buf.length) < 0)
-            LOGE("Uninit: Unmap failed");
+            ALOGE("Uninit: Unmap failed");
 }
 
 int V4L2Camera::StartStreaming ()
@@ -169,7 +169,7 @@ int V4L2Camera::StartStreaming ()
 
         ret = ioctl (fd, VIDIOC_STREAMON, &type);
         if (ret < 0) {
-            LOGE("StartStreaming: Unable to start capture: %s", strerror(errno));
+            ALOGE("StartStreaming: Unable to start capture: %s", strerror(errno));
             return ret;
         }
 
@@ -189,7 +189,7 @@ int V4L2Camera::StopStreaming ()
 
         ret = ioctl (fd, VIDIOC_STREAMOFF, &type);
         if (ret < 0) {
-            LOGE("StopStreaming: Unable to stop capture: %s", strerror(errno));
+            ALOGE("StopStreaming: Unable to stop capture: %s", strerror(errno));
             return ret;
         }
 
@@ -210,7 +210,7 @@ void * V4L2Camera::GrabPreviewFrame ()
     /* DQ */
     ret = ioctl(fd, VIDIOC_DQBUF, &videoIn->buf);
     if (ret < 0) {
-        LOGE("GrabPreviewFrame: VIDIOC_DQBUF Failed");
+        ALOGE("GrabPreviewFrame: VIDIOC_DQBUF Failed");
         return NULL;
     }
     nDequeued++;
@@ -223,7 +223,7 @@ void V4L2Camera::ReleasePreviewFrame ()
     ret = ioctl(fd, VIDIOC_QBUF, &videoIn->buf);
     nQueued++;
     if (ret < 0) {
-        LOGE("GrabPreviewFrame: VIDIOC_QBUF Failed");
+        ALOGE("GrabPreviewFrame: VIDIOC_QBUF Failed");
         return;
     }
 }
@@ -308,17 +308,17 @@ camera_memory_t*  V4L2Camera::GrabJpegFrame (camera_request_memory   mRequestMem
     /* Dequeue buffer */
     ret = ioctl(fd, VIDIOC_DQBUF, &videoIn->buf);
     if (ret < 0) {
-        LOGE("GrabJpegFrame: VIDIOC_DQBUF Failed");
+        ALOGE("GrabJpegFrame: VIDIOC_DQBUF Failed");
         return NULL;
     }
     nDequeued++;
 
-    LOGI("GrabJpegFrame: Generated a frame from capture device");
+    ALOGI("GrabJpegFrame: Generated a frame from capture device");
 
     /* Enqueue buffer */
     ret = ioctl(fd, VIDIOC_QBUF, &videoIn->buf);
     if (ret < 0) {
-        LOGE("GrabJpegFrame: VIDIOC_QBUF Failed");
+        ALOGE("GrabJpegFrame: VIDIOC_QBUF Failed");
         return NULL;
     }
     nQueued++;
@@ -355,7 +355,7 @@ int V4L2Camera::saveYUYVtoJPEG (unsigned char *inputBuffer, int width, int heigh
     jpeg_create_compress (&cinfo);
     jpeg_stdio_dest (&cinfo, file);
 
-    LOGI("JPEG PICTURE WIDTH AND HEIGHT: %dx%d", width, height);
+    ALOGI("JPEG PICTURE WIDTH AND HEIGHT: %dx%d", width, height);
 
     cinfo.image_width = width;
     cinfo.image_height = height;

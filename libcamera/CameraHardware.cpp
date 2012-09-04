@@ -87,7 +87,7 @@ void CameraHardware::initDefaultParameters()
     p.set(p.KEY_SUPPORTED_PICTURE_SIZES, CAM_SIZE);
 
     if (setParameters(p) != NO_ERROR) {
-        LOGE("Failed to set default parameters?!");
+        ALOGE("Failed to set default parameters?!");
     }
 }
 
@@ -129,7 +129,7 @@ int CameraHardware::setPreviewWindow( preview_stream_ops_t *window)
             mNativeWindow=NULL;
     if(window==NULL)
     {
-        LOGW("Window is Null");
+        ALOGW("Window is Null");
         return 0;
     }
     int width, height;
@@ -143,10 +143,10 @@ int CameraHardware::setPreviewWindow( preview_stream_ops_t *window)
                 HAL_PIXEL_FORMAT_RGB_565);
     err = mNativeWindow->set_buffer_count(mNativeWindow, 3);
     if (err != 0) {
-        LOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err), -err);
+        ALOGE("native_window_set_buffer_count failed: %s (%d)", strerror(-err), -err);
 
         if ( ENODEV == err ) {
-            LOGE("Preview surface abandoned!");
+            ALOGE("Preview surface abandoned!");
             mNativeWindow = NULL;
         }
     }
@@ -189,7 +189,7 @@ int CameraHardware::previewThread()
     if (mNativeWindow != NULL)
     {
     if ((err = mNativeWindow->dequeue_buffer(mNativeWindow,(buffer_handle_t**) &hndl2hndl,&stride)) != 0) {
-        LOGW("Surface::dequeueBuffer returned error %d", err);
+        ALOGW("Surface::dequeueBuffer returned error %d", err);
         return -1;
     }
     mNativeWindow->lock_buffer(mNativeWindow, (buffer_handle_t*) hndl2hndl);
@@ -240,11 +240,11 @@ status_t CameraHardware::startPreview()
         return INVALID_OPERATION;
     }
 #if 1
-    LOGI("startPreview: in startpreview \n");
+    ALOGI("startPreview: in startpreview \n");
     mParameters.getPreviewSize(&width, &height);
     for( i=MAX_VIDEONODES; i>=0; i--) {
         sprintf(devnode,"/dev/video%d",i);
-        LOGI("trying the node %s width=%d height=%d \n",devnode,width,height);
+        ALOGI("trying the node %s width=%d height=%d \n",devnode,width,height);
         ret = camera.Open(devnode, width, height, PIXEL_FORMAT);
         if( ret >= 0)
             break;
@@ -260,14 +260,14 @@ status_t CameraHardware::startPreview()
 
     ret = camera.Init();
     if (ret != 0) {  
-        LOGI("startPreview: Camera.Init failed\n");
+        ALOGI("startPreview: Camera.Init failed\n");
         camera.Close();
         return ret;
     }
 
     ret = camera.StartStreaming();
     if (ret != 0) {  
-        LOGI("startPreview: Camera.StartStreaming failed\n");
+        ALOGI("startPreview: Camera.StartStreaming failed\n");
         camera.Uninit();
         camera.Close();
         return ret;
@@ -394,7 +394,7 @@ int CameraHardware::pictureThread()
         mNotifyFn(CAMERA_MSG_SHUTTER, 0, 0, mUser);
 
     mParameters.getPictureSize(&w, &h);
-    LOGD("Picture Size: Width = %d \t Height = %d", w, h);
+    ALOGD("Picture Size: Width = %d \t Height = %d", w, h);
 
     int width, height;
     mParameters.getPictureSize(&width, &height);
@@ -402,7 +402,7 @@ int CameraHardware::pictureThread()
 
     for(i=MAX_VIDEONODES; i>=0; i--) {
         sprintf(devnode,"/dev/video%d",i);
-        LOGI("trying the node %s \n",devnode);
+        ALOGI("trying the node %s \n",devnode);
         ret = camera.Open(devnode, width, height, PIXEL_FORMAT);
         if( ret >= 0)
             break;
@@ -415,7 +415,7 @@ int CameraHardware::pictureThread()
     camera.StartStreaming();
     //TODO xxx : Optimize the memory capture call. Too many memcpy
     if (mMsgEnabled & CAMERA_MSG_COMPRESSED_IMAGE) {
-        LOGD ("mJpegPictureCallback");
+        ALOGD ("mJpegPictureCallback");
         picture = camera.GrabJpegFrame(mRequestMemory);
         mDataFn(CAMERA_MSG_COMPRESSED_IMAGE,picture,0,NULL ,mUser);
     }
@@ -429,7 +429,7 @@ int CameraHardware::pictureThread()
 
 status_t CameraHardware::takePicture()
 {
-        LOGD ("takepicture");
+        ALOGD ("takepicture");
     stopPreview();
 
     pictureThread();
@@ -453,7 +453,7 @@ status_t CameraHardware::setParameters(const CameraParameters& params)
     Mutex::Autolock lock(mLock);
 
     if (strcmp(params.getPictureFormat(), "jpeg") != 0) {
-        LOGE("Only jpeg still pictures are supported");
+        ALOGE("Only jpeg still pictures are supported");
         return -1;
     }
 
@@ -466,7 +466,7 @@ status_t CameraHardware::setParameters(const CameraParameters& params)
     params.getPreviewSize(&w, &h);
     mParameters.setPreviewSize(w,h);
     framerate = params.getPreviewFrameRate();
-    LOGD("PREVIEW SIZE: w=%d h=%d framerate=%d", w, h, framerate);
+    ALOGD("PREVIEW SIZE: w=%d h=%d framerate=%d", w, h, framerate);
     mParameters = params;
     mParameters.setPreviewSize(w,h);
     mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE, supportedFpsRanges);

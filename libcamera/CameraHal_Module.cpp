@@ -49,7 +49,7 @@
 #include <binder/MemoryHeapBase.h>
 #include <utils/threads.h>
 #include "V4L2Camera.h"
-#define LOG_FUNCTION_NAME           LOGD("%d: %s() ENTER", __LINE__, __FUNCTION__);
+#define LOG_FUNCTION_NAME           ALOGD("%d: %s() ENTER", __LINE__, __FUNCTION__);
 
 using namespace android;
 static CameraHardware *V4L2CameraHardware;
@@ -99,13 +99,13 @@ int camera_set_preview_window(struct camera_device * device,
 
     if(window==NULL)
     {
-        LOGW("window is NULL");
+        ALOGW("window is NULL");
         V4L2CameraHardware->setPreviewWindow(window);
      return -1; 
     }
 
         V4L2CameraHardware->setPreviewWindow(window);
-    LOGD("Exiting the function");
+    ALOGD("Exiting the function");
     return 0;
 }
 
@@ -160,12 +160,12 @@ int camera_preview_enabled(struct camera_device * device)
     LOG_FUNCTION_NAME
     if(V4L2CameraHardware->previewEnabled())
     {
-        LOGW("----Preview Enabled----");
+        ALOGW("----Preview Enabled----");
         return 1;
     }
     else
     {
-        LOGW("----Preview not Enabled----");
+        ALOGW("----Preview not Enabled----");
         return 0;
     }
 }
@@ -244,7 +244,7 @@ char* camera_get_parameters(struct camera_device * device)
     // camera service frees this string...
     param = (char*) malloc(sizeof(char) * (params_str8.length()+1));
     strcpy(param, params_str8.string());
-    LOGD("%s",param);
+    ALOGD("%s",param);
 #endif
     LOG_FUNCTION_NAME
     return param;
@@ -314,14 +314,14 @@ int camera_device_open(const hw_module_t* module, const char* name,
     LOG_FUNCTION_NAME
 
 
-    LOGI("camera_device open");
+    ALOGI("camera_device open");
 
     if (name != NULL) {
         cameraid = atoi(name);
 
         if(cameraid > num_cameras)
         {
-            LOGE("camera service provided cameraid out of bounds, "
+            ALOGE("camera service provided cameraid out of bounds, "
                     "cameraid = %d, num supported = %d",
                     cameraid, num_cameras);
             rv = -EINVAL;
@@ -332,7 +332,7 @@ int camera_device_open(const hw_module_t* module, const char* name,
         camera_device = (V4l2_camera_device_t*)malloc(sizeof(*camera_device));
         if(!camera_device)
         {
-            LOGE("camera_device allocation fail");
+            ALOGE("camera_device allocation fail");
             rv = -ENOMEM;
             goto fail;
         }
@@ -340,7 +340,7 @@ int camera_device_open(const hw_module_t* module, const char* name,
         camera_ops = (camera_device_ops_t*)malloc(sizeof(*camera_ops));
         if(!camera_ops)
         {
-            LOGE("camera_ops allocation fail");
+            ALOGE("camera_ops allocation fail");
             rv = -ENOMEM;
             goto fail;
         }
@@ -417,13 +417,13 @@ int camera_get_camera_info(int camera_id, struct camera_info *info)
     const char *valstr = NULL;
     if(camera_id == 0) {
     info->facing = CAMERA_FACING_BACK;
-    LOGD("cameraHal BACK %d",camera_id);
+    ALOGD("cameraHal BACK %d",camera_id);
     }
     else {
-    LOGD("cameraHal Front %d",camera_id);
+    ALOGD("cameraHal Front %d",camera_id);
     info->facing = face_value;
     }
     info->orientation = orientation;
-    LOGD("cameraHal %d",camera_id);
+    ALOGD("cameraHal %d",camera_id);
     return rv;
 }
