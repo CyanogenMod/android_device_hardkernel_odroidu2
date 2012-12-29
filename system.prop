@@ -1,0 +1,6 @@
+#
+# system.prop for odroidu2
+#
+
+#rild.libpath=/system/lib/libmbm-ril.so
+#rild.libargs=-d /dev/ttyACM0
