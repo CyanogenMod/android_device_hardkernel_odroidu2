@@ -1,0 +1,11 @@
+#!/bin/sh
+
+eval FNAME='$'$#
+
+echo "########### Packaging ODROID-U2 components and scripts ################"
+rm -f $FNAME
+## Actual components
+zip -j -r $FNAME $OUT/system.img $OUT/kernel $OUT/ramdisk-uboot.img
+## Scriptage
+zip -u -j -r $FNAME $OUT/install-emmc.sh $OUT/README.txt
+echo "########################################################################"

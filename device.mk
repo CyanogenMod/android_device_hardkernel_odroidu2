@@ -42,6 +42,8 @@
 
 LOCAL_PATH := device/hardkernel/odroidu2
 
+$(call inherit-product-if-exists, vendor/hardkernel/odroidu2/odroidu2-vendor.mk)
+
 include $(LOCAL_PATH)/BoardConfig.mk
 
 ifeq ($(BOARD_USES_EMMC),true)
@@ -52,16 +54,7 @@ endif
 
 ifeq ($(BOARD_USES_HGL),true)
 PRODUCT_COPY_FILES += \
-	device/samsung/smdk4x12/conf/egl.cfg:system/lib/egl/egl.cfg \
-	device/samsung/exynos4/lib/mali_ump/libEGL_mali.so:system/lib/egl/libEGL_mali.so \
-	device/samsung/exynos4/lib/mali_ump/libGLESv1_CM_mali.so:system/lib/egl/libGLESv1_CM_mali.so \
-	device/samsung/exynos4/lib/mali_ump/libGLESv2_mali.so:system/lib/egl/libGLESv2_mali.so \
-	device/samsung/exynos4/lib/mali_ump/libMali.so:system/lib/libMali.so \
-	device/samsung/exynos4/lib/mali_ump/libMali.so:obj/lib/libMali.so \
-	device/samsung/exynos4/lib/mali_ump/libUMP.so:system/lib/libUMP.so \
-	device/samsung/exynos4/lib/mali_ump/libUMP.so:obj/lib/libUMP.so \
-	device/samsung/exynos4/lib/mali_ump/libion.so:system/lib/libion.so \
-	device/samsung/exynos4/lib/mali_ump/libion.so:obj/lib/libion.so
+	$(LOCAL_PATH)/conf/egl.cfg:system/lib/egl/egl.cfg
 endif
 
 ifeq ($(BOARD_USES_EMMC),true)
@@ -85,17 +78,6 @@ endif
 PRODUCT_COPY_FILES += \
 	device/hardkernel/odroidu2/conf/init.odroidu2.usb.rc:root/init.odroidu2.usb.rc 
 
-# WIFI TOOL COPY
-PRODUCT_COPY_FILES += \
-	device/hardkernel/proprietary/etc/iwconfig:system/bin/iwconfig \
-	device/hardkernel/proprietary/etc/iwlist:system/bin/iwlist
-
-#
-# USB Ethernet Module
-#
-PRODUCT_COPY_FILES += \
-	device/hardkernel/proprietary/bin/smsc95xx_u.ko:system/lib/modules/smsc95xx.ko
-
 #-------------------------------------------------------------------------------------
 #
 # WIFI firmware
@@ -103,17 +85,11 @@ PRODUCT_COPY_FILES += \
 #-------------------------------------------------------------------------------------
 ifeq ($(BOARD_WLAN_DEVICE),rt5370sta)
 
-PRODUCT_COPY_FILES += \
-	device/hardkernel/proprietary/bin/rt5370sta.ko:system/lib/modules/rt5370sta.ko \
-	device/hardkernel/proprietary/bin/rt5370sta.cal:system/etc/firmware/rt5370sta.cal 
-
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=ra0 \
 	wifi.supplicant_scan_interval=15
 
 else ifeq ($(BOARD_WLAN_DEVICE), rtl8191su)
-PRODUCT_COPY_FILES += \
-	device/hardkernel/proprietary/bin/rtl8191su.ko:system/lib/modules/rtl8191su.ko \
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	wifi.interface=wlan0 \
@@ -134,14 +110,6 @@ PRODUCT_COPY_FILES += \
 	device/hardkernel/odroidu2/conf/ueventd.odroidu2.rc:root/ueventd.odroidu2.rc
 endif
 
-# Prebuilt kl keymaps
-PRODUCT_COPY_FILES += \
-	device/hardkernel/proprietary/bin/odroid-ts.idc:system/usr/idc/odroidu-ts.idc \
-	device/hardkernel/proprietary/bin/odroid-ts.kl:system/usr/keylayout/odroidu-ts.kl \
-	device/hardkernel/proprietary/bin/odroid-ts.kcm:system/usr/keylayout/odroidu-ts.kcm \
-	device/hardkernel/proprietary/bin/odroid-keypad.kl:system/usr/keylayout/odroid-keypad.kl \
-	device/hardkernel/proprietary/bin/odroid-keypad.kcm:system/usr/keychars/odroid-keypad.kcm
-
 # Filesystem management tools
 PRODUCT_PACKAGES += \
 	make_ext4fs \
@@ -149,8 +117,8 @@ PRODUCT_PACKAGES += \
 
 # audio
 PRODUCT_PACKAGES += \
-	audio_policy.$(TARGET_PRODUCT) \
-	audio.primary.$(TARGET_PRODUCT) \
+	audio_policy.odroidu2 \
+	audio.primary.odroidu2 \
 	audio.a2dp.default \
 	libaudioutils
 
@@ -208,7 +176,8 @@ PRODUCT_PACKAGES += com.google.widevine.software.drm.xml \
 
 # OpenMAX IL configuration files
 PRODUCT_COPY_FILES += \
-	device/hardkernel/odroidu2/media_profiles.xml:system/etc/media_profiles.xml
+	device/hardkernel/odroidu2/media_profiles.xml:system/etc/media_profiles.xml \
+	device/hardkernel/odroidu2/media_codecs.xml:system/etc/media_codecs.xml
 
 # OpenMAX IL modules
 PRODUCT_PACKAGES += \
@@ -225,17 +194,17 @@ PRODUCT_PACKAGES += \
 
 # gps
 PRODUCT_PACKAGES += \
-	gps.$(TARGET_PRODUCT)
+	gps.odroidu2
 
 # MFC firmware
 PRODUCT_COPY_FILES += \
-	device/samsung/exynos4/firmware/mfc_fw.bin:system/vendor/firmware/mfc_fw.bin
+	device/hardkernel/samsung/exynos4/firmware/mfc_fw.bin:system/vendor/firmware/mfc_fw.bin
 
 # FIMC-IS firmware
 PRODUCT_COPY_FILES += \
-	device/samsung/exynos4/firmware/fimc_is_fw.bin:system/vendor/firmware/fimc_is_fw.bin \
-	device/samsung/exynos4/firmware/setfile.bin:system/vendor/firmware/setfile.bin \
-	device/samsung/exynos4/firmware/setfile_S5K3H7.bin:system/vendor/firmware/setfile_S5K3H7.bin
+	device/hardkernel/samsung/exynos4/firmware/fimc_is_fw.bin:system/vendor/firmware/fimc_is_fw.bin \
+	device/hardkernel/samsung/exynos4/firmware/setfile.bin:system/vendor/firmware/setfile.bin \
+	device/hardkernel/samsung/exynos4/firmware/setfile_S5K3H7.bin:system/vendor/firmware/setfile_S5K3H7.bin
 
 #-------------------------------------------------------------------------------------
 #
@@ -243,18 +212,15 @@ PRODUCT_COPY_FILES += \
 #
 #-------------------------------------------------------------------------------------
 PRODUCT_COPY_FILES += \
-	frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
-	frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-	frameworks/base/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
-	frameworks/base/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
-	frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
-	frameworks/base/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
-	frameworks/base/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
+	frameworks/native/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
+	frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
+	frameworks/native/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
+	frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
+	frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
+	frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
+	frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
 	packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
 
-PRODUCT_COPY_FILES += \
-	device/samsung/exynos4/libgralloc_ump/gralloc.odroidu.so:system/lib/hw/gralloc.odroidu2.so
-	
 # The OpenGL ES API level that is natively supported by this device.
 # This is a 16.16 fixed point number
 PRODUCT_PROPERTY_OVERRIDES := \
@@ -275,17 +241,17 @@ ifeq ($(BOARD_USES_HIGH_RESOLUTION_LCD),true)
 PRODUCT_CHARACTERISTICS := tablet
 
 PRODUCT_COPY_FILES += \
-	frameworks/base/data/etc/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml
+	frameworks/native/data/etc/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml
 
-$(call inherit-product, frameworks/base/build/tablet-dalvik-heap.mk)
+$(call inherit-product, frameworks/native/build/tablet-dalvik-heap.mk)
 
 else
 PRODUCT_CHARACTERISTICS := phone
 
 PRODUCT_COPY_FILES += \
-	frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
+	frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
 
-$(call inherit-product, frameworks/base/build/phone-hdpi-512-dalvik-heap.mk)
+$(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.sf.lcd_density=160
@@ -298,21 +264,9 @@ USE_PIXTREE_STAGEFRIGHT := false
 # we have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
 
-PRODUCT_COPY_FILES += \
-	device/hardkernel/proprietary/apk/odroidhwoc.apk:system/app/odroidhwoc.apk \
-	device/hardkernel/proprietary/apk/ODROID-4.0-v1.9.apk:system/app/ODROID.apk \
-	device/hardkernel/proprietary/apk/Terminal-v1.3.apk:system/app/Terminal-v1.3.apk \
-	device/hardkernel/proprietary/apk/FileExplorer-v1.0.apk:system/app/FileExplorer-v1.0.apk \
-	device/hardkernel/proprietary/lib/libterminal.so:system/lib/libterminal.so \
-	device/hardkernel/proprietary/apk/com.slideme.sam.manager-4.5.apk:system/app/slideme-4.5.apk
+## Installation helpers for the "OTA" packages
 
 PRODUCT_COPY_FILES += \
-	device/hardkernel/proprietary/apk/DicePlayer_2_0_18.apk:system/app/DicePlayer_2_0_18.apk \
-	device/hardkernel/proprietary/lib/libSoundTouch.so:system/lib/libSoundTouch.so \
-	device/hardkernel/proprietary/lib/libdice_ics.so:system/lib/libdice_ics.so \
-	device/hardkernel/proprietary/lib/libdice_jb.so:system/lib/libdice_jb.so \
-	device/hardkernel/proprietary/lib/libdice_loadlibrary.so:system/lib/libdice_loadlibrary.so \
-	device/hardkernel/proprietary/lib/libdice_software.so:system/lib/libdice_software.so \
-	device/hardkernel/proprietary/lib/libdice_software_ics.so:system/lib/libdice_software_ics.so \
-	device/hardkernel/proprietary/lib/libdice_software_jb.so:system/lib/libdice_software_jb.so \
-	device/hardkernel/proprietary/lib/libffmpeg_dice.so:system/lib/libffmpeg_dice.so
+    $(LOCAL_PATH)/releasetools/install-emmc.sh:install-emmc.sh \
+    $(LOCAL_PATH)/releasetools/README.txt:README.txt
+
