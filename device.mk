@@ -196,16 +196,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
 	gps.odroidu2
 
-# MFC firmware
-PRODUCT_COPY_FILES += \
-	device/hardkernel/samsung/exynos4/firmware/mfc_fw.bin:system/vendor/firmware/mfc_fw.bin
-
-# FIMC-IS firmware
-PRODUCT_COPY_FILES += \
-	device/hardkernel/samsung/exynos4/firmware/fimc_is_fw.bin:system/vendor/firmware/fimc_is_fw.bin \
-	device/hardkernel/samsung/exynos4/firmware/setfile.bin:system/vendor/firmware/setfile.bin \
-	device/hardkernel/samsung/exynos4/firmware/setfile_S5K3H7.bin:system/vendor/firmware/setfile_S5K3H7.bin
-
 #-------------------------------------------------------------------------------------
 #
 # framework permission file

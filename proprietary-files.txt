@@ -23,3 +23,7 @@ lib/libMali.so
 lib/libUMP.so
 lib/libion.so
 lib/hw/gralloc.odroidu2.so
+vendor/firmware/mfc_fw.bin
+vendor/firmware/fimc_is_fw.bin
+vendor/firmware/setfile.bin
+vendor/firmware/setfile_S5K3H7.bin
