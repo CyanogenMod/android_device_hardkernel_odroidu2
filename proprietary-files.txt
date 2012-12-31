@@ -5,7 +5,6 @@ usr/keylayout/odroidu-ts.kl
 usr/keylayout/odroidu-ts.kcm
 usr/keylayout/odroid-keypad.kl
 usr/keychars/odroid-keypad.kcm
-app/odroidhwoc.apk
 app/ODROID.apk
 app/DicePlayer_2_0_18.apk
 lib/libSoundTouch.so
