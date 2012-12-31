@@ -1,0 +1,14 @@
+[
+ {
+   "repository": "android_device_hardkernel_samsung",
+   "target_path": "device/hardkernel/samsung"
+ },
+ {
+   "repository": "android_hardware_realtek",
+   "target_path": "hardware/realtek"
+ },
+ {
+   "repository": "hardkernel-kernel-4412",
+   "target_path": "kernel/hardkernel/4412-common"
+ }
+]

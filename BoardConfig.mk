@@ -132,7 +132,7 @@ BOARD_SUPPORT_EXTERNAL_GPS := true
 
 # Try to build the kernel
 TARGET_KERNEL_CONFIG := odroidu2_android_emmc_defconfig
-TARGET_KERNEL_SOURCE := kernel/hardkernel/kernel_4412
+TARGET_KERNEL_SOURCE := kernel/hardkernel/4412-common
 
 COMMON_GLOBAL_CFLAGS += -DEXYNOS4_ENHANCEMENTS
 
