@@ -148,6 +148,7 @@ COMMON_GLOBAL_CFLAGS += -Idevice/hardkernel/samsung/$(TARGET_BOARD_PLATFORM)/lib
 COMMON_GLOBAL_CFLAGS += -Idevice/hardkernel/samsung/$(TARGET_BOARD_PLATFORM)/include
 
 TARGET_RECOVERY_PRE_COMMAND := "/system/bin/setup-recovery"
+BOARD_CUSTOM_GRAPHICS := ../../../device/hardkernel/odroidu2/recovery/graphics.c
 
 TARGET_USERIMAGES_SPARSE_EXT_DISABLED := true
 TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT := device/hardkernel/odroidu2/releasetools/odroid_ota_from_target_files

@@ -9,6 +9,7 @@ fi
 
 cp -f /system/pseudorec/boot.scr /mnt/sdcard/
 cp -f /system/pseudorec/recovery-uboot.img /mnt/sdcard/
+cp -f /system/pseudorec/recovery-kernel /mnt/sdcard/
 sync
 
 umount /mnt/sdcard

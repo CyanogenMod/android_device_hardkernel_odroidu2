@@ -264,4 +264,5 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh \
     $(LOCAL_PATH)/recovery/setup-recovery:system/bin/setup-recovery \
+    $(LOCAL_PATH)/recovery/kernel:system/pseudorec/recovery-kernel \
     $(LOCAL_PATH)/recovery/recoveryboot.scr:system/pseudorec/boot.scr
