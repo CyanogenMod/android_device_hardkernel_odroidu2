@@ -25,6 +25,6 @@
 # it includes.
 #
 
-ifeq ($(TARGET_PRODUCT),odroidu2)
+ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),odroidu2)
 PRODUCT_MAKEFILES := $(LOCAL_DIR)/odroidu2.mk
 endif

@@ -38,7 +38,7 @@
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
 
-ifeq ($(TARGET_PRODUCT),odroidu2)
+ifeq ($(TARGET_BOOTLOADER_BOARD_NAME),odroidu2)
 # For example:
 #$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/AndroidTests_intermediates)
 #$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/core_intermediates)

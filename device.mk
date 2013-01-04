@@ -168,9 +168,9 @@ PRODUCT_PACKAGES += \
 
 # Misc other modules
 PRODUCT_PACKAGES += \
-	lights.$(TARGET_PRODUCT) \
+	lights.$(TARGET_BOOTLOADER_BOARD_NAME) \
 	hwcomposer.$(TARGET_BOARD_PLATFORM) \
-	gralloc.$(TARGET_PRODUCT)
+	gralloc.$(TARGET_BOOTLOADER_BOARD_NAME)
 
 # Widevine DRM
 PRODUCT_PACKAGES += com.google.widevine.software.drm.xml \
