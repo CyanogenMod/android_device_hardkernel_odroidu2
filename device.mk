@@ -141,7 +141,7 @@ endif
 
 # Camera
 PRODUCT_PACKAGES += \
-	camera.$(TARGET_PRODUCT)
+	camera.$(TARGET_BOARD_PLATFORM)
 
 # SEC_Camera
 ifeq ($(USE_SEC_CAMERA),true)
