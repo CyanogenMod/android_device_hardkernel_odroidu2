@@ -1,14 +1,13 @@
 import init.odroidu2.usb.rc
 
-on early-init
-    export EXTERNAL_STORAGE /mnt/sdcard
-    export SECONDARY_STORAGE /mnt/ext_sd
-    mkdir /mnt/sdcard 0000 system system
-    symlink /mnt/sdcard /sdcard
-    mkdir /mnt/ext_sd 0000 system system	
-    mkdir /mnt/ext_usb 0000 system system	
-
 on init
+    export EXTERNAL_STORAGE /storage/sdcard
+    export SECONDARY_STORAGE /storage/sdcard1
+    mkdir /storage/sdcard 0000 system system
+    symlink /storage/sdcard /sdcard
+    symlink /storage/sdcard /mnt/sdcard
+    mkdir /storage/sdcard1 0000 system system	
+    mkdir /storage/usb 0000 system system	
 
 # setup the global environment
     export PATH /sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin:/system/busybox/bin:/system/busybox/sbin:/system/busybox/usr/bin:/system/busybox/usr/sbin
