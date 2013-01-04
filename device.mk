@@ -260,6 +260,12 @@ PRODUCT_TAGS += dalvik.gc.type-precise
 ## Installation helpers for the "OTA" packages
 
 PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/releasetools/installboot.sh:installboot.sh \
     $(LOCAL_PATH)/releasetools/install-emmc.sh:install-emmc.sh \
     $(LOCAL_PATH)/releasetools/README.txt:README.txt
 
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh \
+    $(LOCAL_PATH)/recovery/setup-recovery:system/bin/setup-recovery \
+    $(LOCAL_PATH)/recovery/kernel:system/pseudorec/recovery-kernel \
+    $(LOCAL_PATH)/recovery/recoveryboot.scr:system/pseudorec/boot.scr

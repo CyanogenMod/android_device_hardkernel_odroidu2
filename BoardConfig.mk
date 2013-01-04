@@ -15,7 +15,7 @@ ARCH_ARM_HAVE_TLS_REGISTER := true
 
 TARGET_NO_BOOTLOADER := true
 #TARGET_NO_KERNEL := true
-TARGET_NO_RECOVERY := true
+#TARGET_NO_RECOVERY := true
 TARGET_NO_RADIOIMAGE := true
 TARGET_PROVIDES_INIT_TARGET_RC := true
 TARGET_BOOTLOADER_BOARD_NAME := odroidu2
@@ -146,6 +146,9 @@ BOARD_EGL_NEEDS_LEGACY_FB := true
 
 COMMON_GLOBAL_CFLAGS += -Idevice/hardkernel/samsung/$(TARGET_BOARD_PLATFORM)/libhdmi/libhdmiservice
 COMMON_GLOBAL_CFLAGS += -Idevice/hardkernel/samsung/$(TARGET_BOARD_PLATFORM)/include
+
+TARGET_RECOVERY_PRE_COMMAND := "/system/bin/setup-recovery"
+BOARD_CUSTOM_GRAPHICS := ../../../device/hardkernel/odroidu2/recovery/graphics.c
 
 TARGET_USERIMAGES_SPARSE_EXT_DISABLED := true
 TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT := device/hardkernel/odroidu2/releasetools/odroid_ota_from_target_files

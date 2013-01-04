@@ -1,0 +1,8 @@
+fatload mmc 0:1 41000000 recovery-uboot.img
+fatload mmc 0:1 40008000 recovery-kernel
+setenv fb_x_res     "1280"
+setenv fb_y_res     "720"
+setenv hdmi_phy_res "1080"
+setenv bootargs     "console=/dev/ttySAC1,115200n8 androidboot.console=ttySAC1 fb_x_res=${fb_x_res} fb_y_res=${fb_y_res} hdmi_phy_res=${hdmi_phy_res}"
+setenv bootcmd      "bootm 40008000 41000000"
+boot
