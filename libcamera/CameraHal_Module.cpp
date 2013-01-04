@@ -253,6 +253,7 @@ char* camera_get_parameters(struct camera_device * device)
 static void camera_put_parameters(struct camera_device *device, char *params)
 {
     LOG_FUNCTION_NAME
+    ALOGD("params are %s",params);
     CameraParameters *camParams = new CameraParameters();
     String8 *params_str8 = new String8(params);
     camParams->unflatten(*params_str8);

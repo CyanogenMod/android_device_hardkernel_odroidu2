@@ -77,10 +77,10 @@
 #define LOCK_BUFFER_TRIES 5
 #define HAL_PIXEL_FORMAT_NV12 0x100
 
-#define CAMHAL_LOGI LOGI
+#define CAMHAL_LOGI ALOGI
 
 //Uncomment to enable more verbose/debug logs
-//#define DEBUG_LOG
+#define DEBUG_LOG
 
 ///Camera HAL Logging Functions
 #ifndef DEBUG_LOG
@@ -90,8 +90,8 @@
 #define CAMHAL_LOGVA(str)
 #define CAMHAL_LOGVB(str, ...)
 
-#define CAMHAL_LOGEA LOGE
-#define CAMHAL_LOGEB LOGE
+#define CAMHAL_LOGEA ALOGE
+#define CAMHAL_LOGEB ALOGE
 
 #undef LOG_FUNCTION_NAME
 #undef LOG_FUNCTION_NAME_EXIT

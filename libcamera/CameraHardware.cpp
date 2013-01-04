@@ -28,7 +28,7 @@
 #include <hal_public.h>
 #include <ui/GraphicBufferMapper.h>
 #include <gui/ISurfaceTexture.h>
-#define MAX_VIDEONODES      20
+#define MAX_VIDEONODES      5
 #define MIN_WIDTH           320
 #define MIN_HEIGHT          240
 #define CAM_SIZE            "320x240"
@@ -471,6 +471,8 @@ status_t CameraHardware::setParameters(const CameraParameters& params)
     mParameters.setPreviewSize(w,h);
     mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE, supportedFpsRanges);
     mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "320x240,352x288,640x480,720x480,720x576,848x480");
+    mParameters.set(CameraParameters::KEY_SUPPORTED_FOCUS_MODES, "fixed");
+    mParameters.set(CameraParameters::KEY_EXPOSURE_COMPENSATION_STEP, "0");
 
     return NO_ERROR;
 }
