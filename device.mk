@@ -122,6 +122,9 @@ PRODUCT_PACKAGES += \
 	audio.a2dp.default \
 	libaudioutils
 
+PRODUCT_COPY_FILES += \
+	device/hardkernel/odroidu2/conf/audio_policy.conf:system/etc/audio_policy.conf
+
 # ULP Audio
 ifeq ($(USE_ULP_AUDIO),true)
 PRODUCT_PACKAGES += \
