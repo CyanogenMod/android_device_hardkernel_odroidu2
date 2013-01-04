@@ -1,4 +1,10 @@
 import init.odroidu2.usb.rc
+#===================================================================
+#
+# WIFI wpa suppplicant service 
+#
+#===================================================================
+import init.wlan.rc
 
 on init
     export EXTERNAL_STORAGE /storage/sdcard
@@ -52,8 +58,8 @@ on post-fs-data
 	mkdir /data/misc/dhcp 0770 dhcp dhcp
 	chown dhcp dhcp /data/misc/dhcp
 
-	setprop wifi.interface "ra0"
-	setprop wlan.interface "ra0"
+	setprop wifi.interface ${ro.wlaniface}
+	setprop wlan.interface ${ro.wlaniface}
 	setprop wlan.driver.status "ok"
 
     setprop vold.post_fs_data_done 1
@@ -81,33 +87,12 @@ service setup_fs /system/bin/setup_fs \
     group root
     oneshot
 
-#===================================================================
-#
-# WIFI wpa suppplicant service
-#
-#===================================================================
-service wpa_supplicant /system/bin/wpa_supplicant -Dwext -ira0 -c /data/misc/wifi/wpa_supplicant.conf
-	class main
-    socket wpa_ra0 dgram 0660 wifi wifi
-	disabled
-	oneshot
-
-service dhcpcd_ra0 /system/bin/dhcpcd -ABKL
-	class main
-	disabled
-	oneshot
-
 service dhcpcd_eth0 /system/bin/dhcpcd -ABKL
 	class main
 	disabled
 	oneshot
 
 service dhcpcd_bnep0 /system/bin/dhcpcd -ABKL
-	class main
-	disabled
-	oneshot
-
-service iprenew_ra0 /system/bin/dhcpcd -n
 	class main
 	disabled
 	oneshot

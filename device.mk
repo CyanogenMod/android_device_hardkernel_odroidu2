@@ -67,12 +67,19 @@ endif
 
 # Init files
 
-ifeq ($(BOARD_WLAN_DEVICE), rt5370sta)
 PRODUCT_COPY_FILES += \
 	device/hardkernel/odroidu2/conf/init.odroidu2.rc:root/init.odroidu2.rc 
-else ifeq ($(BOARD_WLAN_DEVICE), rtl8191su)
+
+ifeq ($(BOARD_WLAN_DEVICE), rt5370sta)
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+        ro.wlaniface=ra0
 PRODUCT_COPY_FILES += \
-	device/hardkernel/odroidu2/conf/init.odroidu2_realtek.rc:root/init.odroidu2.rc 
+	device/hardkernel/odroidu2/conf/init.ra0.rc:root/init.wlan.rc
+else
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+        ro.wlaniface=wlan0
+PRODUCT_COPY_FILES += \
+	device/hardkernel/odroidu2/conf/init.wlan0.rc:root/init.wlan.rc
 endif
 	
 PRODUCT_COPY_FILES += \
