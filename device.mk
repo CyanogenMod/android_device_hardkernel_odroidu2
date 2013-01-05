@@ -68,7 +68,8 @@ endif
 # Init files
 
 PRODUCT_COPY_FILES += \
-	device/hardkernel/odroidu2/conf/init.odroidu2.rc:root/init.odroidu2.rc 
+	device/hardkernel/odroidu2/conf/init.odroidu2.rc:root/init.odroidu2.rc \
+	device/hardkernel/odroidu2/conf/fstab.odroidu2:root/fstab.odroidu2
 
 ifeq ($(BOARD_WLAN_DEVICE), rt5370sta)
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
