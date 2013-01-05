@@ -85,6 +85,10 @@ void CameraHardware::initDefaultParameters()
     p.setPictureSize(MIN_WIDTH, MIN_HEIGHT);
     p.setPictureFormat("jpeg");
     p.set(p.KEY_SUPPORTED_PICTURE_SIZES, CAM_SIZE);
+    p.set(CameraParameters::KEY_SUPPORTED_FOCUS_MODES, "fixed");
+    p.set(CameraParameters::KEY_EXPOSURE_COMPENSATION_STEP, "0");
+    p.set(CameraParameters::KEY_VIDEO_STABILIZATION_SUPPORTED, "false");
+    p.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES, "8,10,12,15,20,24,25,30");
 
     if (setParameters(p) != NO_ERROR) {
         ALOGE("Failed to set default parameters?!");
@@ -471,8 +475,6 @@ status_t CameraHardware::setParameters(const CameraParameters& params)
     mParameters.setPreviewSize(w,h);
     mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE, supportedFpsRanges);
     mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "320x240,352x288,640x480,720x480,720x576,848x480");
-    mParameters.set(CameraParameters::KEY_SUPPORTED_FOCUS_MODES, "fixed");
-    mParameters.set(CameraParameters::KEY_EXPOSURE_COMPENSATION_STEP, "0");
 
     return NO_ERROR;
 }
