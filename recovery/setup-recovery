@@ -1,15 +1,4 @@
 #!/system/bin/sh
 
-/system/xbin/mount /dev/block/mmcblk0p1 /storage/sdcard
-
-if [ -f /storage/sdcard/boot.scr ]; then
-    ## backup any existing scripts
-    cp -f /storage/sdcard/boot.scr /sdcard/boot.scr-recoverybak
-fi
-
-cp -f /system/pseudorec/boot.scr /storage/sdcard/
-cp -f /system/pseudorec/recovery-uboot.img /storage/sdcard/
-cp -f /system/pseudorec/recovery-kernel /storage/sdcard/
-sync
-
-umount /storage/sdcard
+/system/bin/setprop ctl.start prep-recovery
+sleep 3

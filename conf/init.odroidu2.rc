@@ -106,4 +106,9 @@ service iprenew_eth0 /system/bin/dhcpcd -n
     class main
     disabled
     oneshot
-    
+   
+service prep-recovery /system/bin/pseudorec-to-sd
+    class main
+    disabled
+    user root
+    oneshot
