@@ -246,6 +246,9 @@ PRODUCT_COPY_FILES += \
 
 $(call inherit-product, frameworks/native/build/tablet-dalvik-heap.mk)
 
+PRODUCT_PROPERTY_OVERRIDES += \
+	ro.sf.lcd_density=213
+
 else
 PRODUCT_CHARACTERISTICS := phone
 

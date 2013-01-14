@@ -6,15 +6,7 @@ usr/keylayout/odroidu-ts.kcm
 usr/keylayout/odroid-keypad.kl
 usr/keychars/odroid-keypad.kcm
 app/ODROID.apk
-app/DicePlayer_2_0_18.apk
 lib/libSoundTouch.so
-lib/libdice_ics.so
-lib/libdice_jb.so
-lib/libdice_loadlibrary.so
-lib/libdice_software.so
-lib/libdice_software_ics.so
-lib/libdice_software_jb.so
-lib/libffmpeg_dice.so
 lib/egl/libEGL_mali.so
 lib/egl/libGLESv1_CM_mali.so
 lib/egl/libGLESv2_mali.so
