@@ -9,4 +9,5 @@
     <integer name="def_user_rotation">0</integer>
     <!-- Development settings -->
     <bool name="def_stay_on_while_plugged_in">true</bool>
+    <integer name="def_battery_style">4</integer>
 </resources>
