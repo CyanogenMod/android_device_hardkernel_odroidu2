@@ -281,3 +281,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/pseudorec-to-sd:system/bin/pseudorec-to-sd \
     $(LOCAL_PATH)/recovery/kernel:system/pseudorec/recovery-kernel \
     $(LOCAL_PATH)/recovery/recoveryboot.scr:system/pseudorec/boot.scr
+
+## Not the prettiest hack ever, but it'll do until JPlayer is understood
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/conf/98netflix:system/etc/init.d/98netflix
