@@ -285,3 +285,6 @@ PRODUCT_COPY_FILES += \
 ## Not the prettiest hack ever, but it'll do until JPlayer is understood
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/conf/98netflix:system/etc/init.d/98netflix
+
+PRODUCT_AAPT_CONFIG := normal large tvdpi hdpi
+PRODUCT_AAPT_PREF_CONFIG := tvdpi
