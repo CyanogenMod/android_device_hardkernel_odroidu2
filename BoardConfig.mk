@@ -120,9 +120,8 @@ ifeq ($(BOARD_WLAN_DEVICE), rtl8191su)
     WIFI_DRIVER_FW_PATH_P2P          := ""
     WIFI_DRIVER_FW_PATH_PARAM        := ""
 endif
-
 BOARD_HAVE_BLUETOOTH := true
-BOARD_HAVE_BLUETOOTH_USB := true
+#BOARD_HAVE_BLUETOOTH_USB := true
 
 USE_OPENGL_RENDERER := true
 BOARD_CAMERA	:= odroidx

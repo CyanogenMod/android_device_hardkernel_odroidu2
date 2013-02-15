@@ -118,6 +118,11 @@ PRODUCT_COPY_FILES += \
 	device/hardkernel/odroidu2/conf/ueventd.odroidu2.rc:root/ueventd.odroidu2.rc
 endif
 
+#generic serial bluetooth
+PRODUCT_COPY_FILES += \
+	device/hardkernel/odroidu2/conf/init.bt.sh:/system/etc/init.bt.sh
+
+
 # Filesystem management tools
 PRODUCT_PACKAGES += \
 	make_ext4fs \
@@ -222,7 +227,8 @@ PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
 	packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml \
 	frameworks/native/data/etc/android.hardware.camera.autofocus.xml:system/etc/permissions/android.hardware.camera.autofocus.xml \
-	frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml
+	frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
+	frameworks/native/data/etc/android.hardware.bluetooth.xml:system/etc/permissions/android.hardware.bluetooth.xml
 
 
 # The OpenGL ES API level that is natively supported by this device.
