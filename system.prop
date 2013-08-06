@@ -5,3 +5,4 @@
 #rild.libpath=/system/lib/libmbm-ril.so
 #rild.libargs=-d /dev/ttyACM0
 #
+ro.bq.gpu_to_cpu_unsupported=1

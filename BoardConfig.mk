@@ -11,6 +11,7 @@ TARGET_CPU_ABI2 := armeabi
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_CPU_SMP := true
+TARGET_CPU_VARIANT := cortex-a9
 ARCH_ARM_HAVE_TLS_REGISTER := true
 
 TARGET_NO_BOOTLOADER := true
@@ -149,6 +150,8 @@ BOARD_EGL_NEEDS_LEGACY_FB := true
 COMMON_GLOBAL_CFLAGS += -Idevice/hardkernel/samsung/$(TARGET_BOARD_PLATFORM)/libhdmi/libhdmiservice
 COMMON_GLOBAL_CFLAGS += -Idevice/hardkernel/samsung/$(TARGET_BOARD_PLATFORM)/include
 
+TARGET_RECOVERY_FSTAB = device/hardkernel/odroidu2/conf/fstab.odroidu2
+RECOVERY_FSTAB_VERSION = 2
 TARGET_RECOVERY_PRE_COMMAND := "/system/bin/setup-recovery"
 BOARD_CUSTOM_GRAPHICS := ../../../device/hardkernel/odroidu2/recovery/graphics.c
 

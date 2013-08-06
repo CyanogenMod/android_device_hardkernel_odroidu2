@@ -57,14 +57,6 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/conf/egl.cfg:system/lib/egl/egl.cfg
 endif
 
-ifeq ($(BOARD_USES_EMMC),true)
-PRODUCT_COPY_FILES += \
-	device/hardkernel/odroidu2/vold_emmc.fstab:system/etc/vold.fstab
-else
-PRODUCT_COPY_FILES += \
-	device/hardkernel/odroidu2/vold_sd.fstab:system/etc/vold.fstab
-endif
-
 # Init files
 
 PRODUCT_COPY_FILES += \

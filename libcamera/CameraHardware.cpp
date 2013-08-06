@@ -27,7 +27,7 @@
 #include <cutils/native_handle.h>
 #include <hal_public.h>
 #include <ui/GraphicBufferMapper.h>
-#include <gui/ISurfaceTexture.h>
+#include <gui/IGraphicBufferProducer.h>
 #define MAX_VIDEONODE      5
 #define MIN_VIDEONODE      4
 #define MIN_WIDTH           320

@@ -6,3 +6,6 @@
 /dev/block/mmcblk0p2 /system ext4 ro wait
 /dev/block/mmcblk0p3 /data ext4 nosuid,nodev,noatime,nomblk_io_submit,noauto_da_alloc wait
 /dev/block/mmcblk0p4 /cache ext4 nosuid,nodev,noatime,nomblk_io_submit wait
+/devices/platform/dw_mmc/mmc_host/mmc0 /storage/sdcard vfat nonremovable,encryptable voldmanaged=sdcard:1
+/devices/platform/s3c-sdhci.2/mmc_host/mmc1 /storage/sdcard1 vfat defaults voldmanaged=ext_sd:auto
+/dev/block/mmcblk0p1 /sdcard vfat defaults recoveryonly
