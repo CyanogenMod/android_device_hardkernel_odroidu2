@@ -41,7 +41,7 @@ ifneq ($(strip $(TARGET_NO_KERNEL)),true)
 $(INSTALLED_RAMDISK_TARGET): $(MKIMAGE) $(INTERNAL_RAMDISK_FILES) $(BUILT_RAMDISK_TARGET)
 			$(MKIMAGE) $(INTERNAL_UMULTIIMAGE_ARGS)
 
-$(INSTALLED_BOOTIMAGE_TARGET): $(INSTALLED_RAMDISK_TARGET) $(INSTALLED_KERNEL_TARGET)
+$(INSTALLED_BOOTIMAGE_TARGET): $(MKBOOTIMG) $(INSTALLED_RAMDISK_TARGET) $(INSTALLED_KERNEL_TARGET)
 			$(MKBOOTIMG) --kernel $(INSTALLED_KERNEL_TARGET) --ramdisk $(PRODUCT_OUT)/ramdisk-uboot.img -o $@
 			@echo ----- Made fastboot image -------- $@
 
@@ -56,7 +56,7 @@ ifneq ($(strip $(TARGET_NO_RECOVERY)),true)
 
     RCV_INTERNAL_UMULTIIMAGE_ARGS += -d $(PRODUCT_OUT)/ramdisk-recovery.img $(RECOVERYFS_PATH)/recovery-uboot.img
 
-$(INSTALLED_RECOVERYIMAGE_TARGET): $(INSTALLED_BOOTIMAGE_TARGET) $(MKIMAGE) $(recovery_ramdisk) $(recovery_kernel)
+$(INSTALLED_RECOVERYIMAGE_TARGET): $(MKBOOTIMG) $(INSTALLED_BOOTIMAGE_TARGET) $(MKIMAGE) $(recovery_ramdisk) $(recovery_kernel)
 			mkdir -p $(RECOVERYFS_PATH)
 			$(MKIMAGE) $(RCV_INTERNAL_UMULTIIMAGE_ARGS)
 			$(MKBOOTIMG) --kernel $(recovery_kernel) --ramdisk $(RECOVERYFS_PATH)/recovery-uboot.img -o $@
